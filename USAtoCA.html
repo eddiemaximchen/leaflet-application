@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- leaflet css setting -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css" integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin="" />
+    
+    <!-- leaflet css -->
+    <style>
+        table, thead, th, tbody, tr, td {
+            border: 1px solid;
+        }
+
+        #map { height: 800px; }
+    </style>
+</head>
+<body onload="document.getElementById('btn_request').click();">
+    <button id="btn_request" style="font-size: 0px;">states</button> <!--default click hide button for style -->
+
+    <div id="map"></div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>region</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <!-- leaflet JS cdn -->
+    <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js" integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin=""></script>
+    
+    <!-- leaflet js -->
+    <script>
+    //get map of Philadelphia
+    let map = L.map('map').setView([38,  -97], 5);<!-- [latitude,longtitude] 13 is eagle view smaller value mean more zoom in-->
+
+    //initialize map layers(default)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    //set layer group
+    let layerGroup = null;
+    let arrLayers = [];
+    //get url
+    var getUrlString = location.href;
+    //turn url into string
+    var url = new URL(getUrlString);
+    //getParams for html reuse
+    var json1=url.searchParams.get('json1')
+    var region=url.searchParams.get('region')
+    if (region=='country'){json1='stateCA';}
+    if (json1==null) {json1='stateCA';}
+    if (region=='state'){json1='CA'}
+    var jsonfile=json1+'.json'
+    var lat=url.searchParams.get('lat')
+    var lng=url.searchParams.get('lng')
+    var eagle=url.searchParams.get('eagle')
+    if (lat!=null){map.setView([lat,lng],eagle);}
+    // add click event for button and get response data from web api
+    document.querySelector('button#btn_request').addEventListener('click', function(event){
+        /**
+         * fetch - Asynchronous Transfer Method
+         * use ajax (xml http request) tech to send response and get request without changing page
+        **/
+         fetch(jsonfile).then(function(response){
+            /**
+             * response.text() - txt or html
+             * response.blob() - image file encoding base64
+             * response.json() - automatically turn json string from response to object
+             */
+            return response.json();
+        }).then(function(arr){
+            //delete previous markers
+            if( layerGroup != null && map.hasLayer(layerGroup) ) {
+                layerGroup.clearLayers();
+                map.removeLayer(layerGroup);
+
+                //initialize variables
+                layerGroup = null;
+                arrLayers = [];
+            }
+
+            // get tbody 
+            let tbody = document.querySelector('table > tbody');
+
+            // empty tbody's children elements ex:tr,td 
+            tbody.innerHTML = '';
+
+            // Dynamically generate pages using return data
+            for(let o of arr){
+                //layout mapping html tag
+                let tr = document.createElement("tr");
+                //nation
+                if (json1=='stateCA'){
+                    tr.innerHTML = `<td>${o['statename']}</td>
+                                        <td>${o['Latitude']}</td>
+                                        <td>${o['Longitude']}</td>`;
+                    tbody.appendChild(tr);
+
+                    //build markers states
+                            let marker = L.marker([o['Latitude'], o['Longitude']])
+                            .bindPopup(`${o['statename']}<a href="USAtoCA.html?region=state&json1=${o['state']}&lat=${o['Latitude']}&lng=${o['Longitude']}&eagle=7">state map</a>`)
+                            .openPopup();
+                    //add click event to marker
+                    marker.addEventListener('click', function(event){
+                        console.log(o);
+                    });
+                    //push markers in arrLayers 
+                    arrLayers.push(marker);
+                    }    
+                else {
+                    //state 
+                        tr.innerHTML = `<td>${o['city']}</td>
+                                        <td>${o['lat']}</td>
+                                        <td>${o['lng']}</td>`;
+                        tbody.appendChild(tr);
+                        //build markers cities
+                            let marker = L.marker([o['lat'], o['lng']])
+                            .bindPopup(`${o['city']}<a href="USAtoCA.html?region=country&lat=38&lng=-97&eagle=5">back home</a>`)
+                            .openPopup();
+                        //add click event to marker
+                        marker.addEventListener('click', function(event){
+                            console.log(o);
+                        });
+                        //push markers in arrLayers 
+                        arrLayers.push(marker);
+                }
+            }
+                
+            //append arrLayers into layerGroup 
+            layerGroup = L.layerGroup(arrLayers);
+
+            //append layerGroup into map 
+            layerGroup.addTo(map);
+        });
+    });
+    </script>
+</body>
+</html>
