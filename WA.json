@@ -1,0 +1,20 @@
+[
+    {
+        "name": "Suave Nails",
+        "address": "4013 N Market St",
+        "city": "Spokane",
+        "category": "Beauty & Spas, Nail Salons",
+        "stars": 2.5,
+        "latitude": 39.760807,
+        "longitude": -75.522491
+    },
+    {
+        "name": "Valvoline Instant Oil Change",
+        "address": "325 NE Myra Road",
+        "city": "College Place",
+        "category": "Oil Change Stations, Automotive",
+        "stars": 4.5,
+        "latitude": 39.611974000000004,
+        "longitude": -86.1588974
+    }
+]

@@ -1,0 +1,20 @@
+[
+    {
+        "name": "United Parcel Service",
+        "address": "110 Kimball Ln",
+        "city": "Lynnfield",
+        "category": "Local Services, Shipping Centers",
+        "stars": 1.5,
+        "latitude": 39.310158,
+        "longitude": -119.650053
+    },
+    {
+        "name": "YOCO Maids & Cleaning",
+        "address": "",
+        "city": "Boston",
+        "category": "Home Services, Home Cleaning",
+        "stars": 1.0,
+        "latitude": 39.96244,
+        "longitude": -75.19993
+    }
+]

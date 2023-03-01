@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- leaflet css 設定 -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css" integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin="" />
+    
+    <!-- 自訂 css -->
+    <style>
+        table, thead, th, tbody, tr, td {
+            border: 1px solid;
+        }
+
+        #map { height: 750px; }
+    </style>
+</head>
+<body onload="document.getElementById('btn_request').click();">
+    <button id="btn_request" style="font-size: 0px;">usa map</button>
+
+    <div id="map"></div>
+
+    <table>
+    <thead></thead>
+    <tbody></tbody>
+    </table>
+    <!-- leaflet JS cdn -->
+    <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js" integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin=""></script>
+    
+    <!-- 自訂 js -->
+    <script>
+    //引入地圖
+    let map = L.map('map').setView([46, -97], 4);
+
+    //初始化地圖圖層(預設)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    //設定圖層群組
+    let layerGroup = null;
+    let arrLayers = [];
+    //取得網址列參數以便重新對網頁下指令
+    var getUrlString = location.href;
+    var url = new URL(getUrlString);
+    //不同的區域可以有不同的指令
+    var region=url.searchParams.get('region');
+    //取得州經緯度以便map.setView eagleview設8
+    var lat=url.searchParams.get('lat');
+    var lng=url.searchParams.get('lng');
+    if (lat!=null && region=="state"){map.setView([lat,lng],13);}
+    //直接保持city table put store markers
+    var st=url.searchParams.get('state');
+    var jsonfile='';
+    if(region=='state'){jsonfile=st+'.json'}
+    else{jsonfile='states.json'}
+    // 按鈕事件，取得 Web API 的回傳資料
+    document.querySelector('button#btn_request').addEventListener('click', function(event){
+        /**
+         * 非同步傳輸的工具 - fetch
+         * 透過 ajax (xml http request) 技術，
+         * 做到不切換頁面也能請求資料/取得回應的方法
+         * 
+         * 參考網頁:
+         * 1. 鐵人賽：ES6 原生 Fetch 遠端資料方法
+         * https://www.casper.tw/javascript/2017/12/28/javascript-fetch/
+         */
+        fetch(jsonfile).then(function(response){
+            /**
+             * response.text() - 純文字 or html            thead.innerHTML = '';
+             * response.blob() - 通常用於 base64 編碼後的 img 內容
+             * response.json() - 若回傳的格式為 json 文字，自動轉成物件 (Object)
+             */
+            return response.json();
+        }).then(function(arr){
+            //刪除先前的 markers
+            if( layerGroup != null && map.hasLayer(layerGroup) ) {
+                layerGroup.clearLayers();
+                map.removeLayer(layerGroup);
+
+                //變數初始化
+                layerGroup = null;
+                arrLayers = [];
+            }
+
+            // 取得 thead, tbody 元素
+            let thead = document.querySelector('table > thead')
+            let tbody = document.querySelector('table > tbody');
+            if (region==null | region =='country'){
+                //刪除會錯 所以留著
+                for(let o of arr){
+                    //建立 markers lat&lng success
+                    let marker = L.marker([o['latitude'], o['longitude']])
+                    .bindPopup(`${o['state_name']}<br><a href="usa.html?region=state&state=${o['state']}&lat=${o['latitude']}&lng=${o['longitude']}">state map</a>`)
+                    .openPopup();
+                
+                    //自訂事件 目標：點擊州會出現城市且可連結至該市
+                    marker.addEventListener('click', function(event,markerID){
+                        //名字不要寫markerID就成功 原因不明
+                        var markID= `${o['markerID']}`
+                        // 清空 tbody 底下既有元素，如 tr td 等
+                        thead.innerHTML = '';
+                        tbody.innerHTML = '';
+                        let title = document.createElement("tr");
+                        title.innerHTML="<td>cities in this state</td>"
+                        thead.appendChild(title)
+                        for(let o of arr){
+                            let tr = document.createElement("tr");
+                            tr.innerHTML = `<td><a href="usa.html?region=city&lat=${o['cities'][markID]['latitude']}&lng=${o['cities'][markID]['longitude']}">${o['cities'][markID]['city']}</a></td>`;
+                            tbody.appendChild(tr)
+                        //保留當前markID
+                        prevMarkID=markID
+                    }// end of secnod for
+                    console.log(o);
+                    });//end of eventlistener
+
+                //將 markers 各別放到空陣列 arrLayers 當中
+                arrLayers.push(marker);
+                }//end of first for
+            }//end of if   
+            else{
+                    // 清空 tbody 底下既有元素，如 tr td 等
+                    thead.innerHTML = '';
+                    tbody.innerHTML = '';
+                    let title = document.createElement("tr");
+                    title.innerHTML="<td>stores in this state</td><td>addresss</td><td>city</td><td>category</td><td>stars</td>"
+                    thead.appendChild(title)
+                
+                for(let o of arr){
+                     
+                    //建立store table
+                    let tr = document.createElement("tr");
+                    tr.innerHTML =`<td>${o['name']}</td><td>${o['address']}</td><td>${o['city']}</td>
+                                   <td>${o['category']}</td><td>${o['stars']}</td>`
+                    tbody.appendChild(tr)
+                    //建立 markers 
+                    let marker = L.marker([o['latitude'], o['longitude']])
+                    .bindPopup(`${o['name']}<br>`)
+                    .openPopup();
+                
+                    //自訂事件 目標：出現該州商店
+                    marker.addEventListener('click', function(event){
+                            
+                        console.log(o);
+                        });//end of eventlistener
+
+                    //將 markers 各別放到空陣列 arrLayers 當中
+                    arrLayers.push(marker);
+                    }//end of first for
+            }//end of first else
+            //迴圈執行完畢後，將 arrLayers 放到 layerGroup 當中
+            layerGroup = L.layerGroup(arrLayers);
+
+            //將 layerGroup 放到 map 當中
+            layerGroup.addTo(map);
+        });
+    });
+    </script>
+</body>
+</html>

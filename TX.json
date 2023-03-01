@@ -1,0 +1,38 @@
+[
+    {
+        "name": "Southern Luxe Beauty",
+        "address": "31 Eagles Ct",
+        "city": "Mount Juliet",
+        "category": "Beauty & Spas, Makeup Artists, Hair Salons, Hair Stylists",
+        "stars": 5.0,
+        "latitude": 36.1279507,
+        "longitude": -86.4722991
+    },
+    {
+        "name": "2400 Briarwest",
+        "address": "2400 Briarwest Blvd",
+        "city": "Houston",
+        "category": "Real Estate, Home Services, Apartments",
+        "stars": 1.5,
+        "latitude": 36.0826619,
+        "longitude": -86.94427
+    },
+    {
+        "name": "Wildlife Wonders",
+        "address": "7703 N Lamar Blvd, Ste 118",
+        "city": "Austin",
+        "category": "Shopping, Outdoor Furniture Stores, Home Decor, Jewelry, Home & Garden",
+        "stars": 2.0,
+        "latitude": 27.8398926,
+        "longitude": -82.7645055
+    },
+    {
+        "name": "Residences at Glenview Reserve Apartment Homes",
+        "address": "100 Arbor Creek Blvd",
+        "city": "Nashville",
+        "category": "Real Estate, Home Services, Apartments",
+        "stars": 3.0,
+        "latitude": 36.1334004,
+        "longitude": -86.698535
+    }
+]
