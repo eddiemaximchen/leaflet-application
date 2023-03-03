@@ -1,4 +1,4 @@
-# leaflet-application
+# traveling with leaflet
 cors.html with web_api_coffee.py to avioid CORS; 
 
 use map.py and addCityToState.py to make my own maps.
