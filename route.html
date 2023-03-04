@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Route</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="../dist/leaflet-routing-machine.css" />
+    <link rel="stylesheet" href="index.css" />
+</head>
+<body>
+    <div id="map" class="map"></div>
+    <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
+    <script src="../dist/leaflet-routing-machine.js"></script>
+    <script src="Control.Geocoder.js"></script>
+    <script src="config.js"></script>
+    <script>
+        var map = L.map('map');
+
+		L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']}).addTo(map);
+
+		//取得網址列參數以便重新對網頁下指令
+		var getUrlString = location.href;
+		var url = new URL(getUrlString);
+		//取得起點經緯度
+		var startlat=url.searchParams.get('startlat');
+		var startlng=url.searchParams.get('startlng');
+		//取得終點經緯度
+		var endlat=url.searchParams.get('endlat');
+		var endlng=url.searchParams.get('endlng');
+		var control = L.Routing.control(L.extend(window.lrmConfig, {
+		waypoints: [
+			L.latLng(startlat, startlng), 
+			L.latLng(endlat, endlng) 
+		],
+		geocoder: L.Control.Geocoder.nominatim(),
+		routeWhileDragging: true,
+		reverseWaypoints: true,
+		showAlternatives: true,
+		altLineOptions: {
+			styles: [
+				{color: 'black', opacity: 0.15, weight: 9},
+				{color: 'white', opacity: 0.8, weight: 6},
+				{color: 'blue', opacity: 0.5, weight: 2}
+			]
+		}
+		})).addTo(map);
+
+		L.Routing.errorControl(control).addTo(map);
+    </script>
+</body>
+</html>
